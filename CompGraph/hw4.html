@@ -1,0 +1,68 @@
+<HTML>
+<BODY>
+<canvas id='hw21' height='700' width='700' style='border:1px solid'>
+</canvas>
+<canvas id='hw22' height='700' width='700' style='border:1px solid'>
+</canvas>
+<a href='#' id='btn' class='button' style='font-size: 200%'>BUTTON</a>
+
+<script>
+	var canvas = document.getElementById('hw21');
+	var ctx = canvas.getContext('2d');
+	var canvas2 = document.getElementById('hw22');
+	var ctx2 = canvas2.getContext('2d');
+	var img = new Image();
+	img.src = 'test.jpg';
+	img.onload = function() {
+		ctx.drawImage(img, 0, 0);
+	};
+	var combmeth = function() {
+		var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		var imageData2 = ctx2.createImageData(canvas.width, canvas.height);
+		for(let i = 0;i < canvas.height;i++) {
+			for(let j = 0;j < canvas.width;j++) {
+				for (let k = 0;k < 3;k++) {
+					p11 = imageData.data[4 * ((i - 1) * canvas.width + j - 1) + k];
+					p12 = imageData.data[4 * ((i - 1) * canvas.width + j) + k];
+					p13 = imageData.data[4 * ((i - 1) * canvas.width + j + 1) + k];
+					p21 = imageData.data[4 * ((i) * canvas.width + j - 1) + k];
+					p22 = imageData.data[4 * ((i) * canvas.width + j) + k];
+					p23 = imageData.data[4 * ((i) * canvas.width + j + 1) + k];
+					p31 = imageData.data[4 * ((i + 1) * canvas.width + j - 1) + k];
+					p32 = imageData.data[4 * ((i + 1) * canvas.width + j) + k];
+					p33 = imageData.data[4 * ((i + 1) * canvas.width + j + 1) + k];
+					imageData2.data[4 * (i * canvas.width + j) + k] = (4 * p22 + 2 * (p12 + p32 + p21 + p23) + p11 + p13 + p31 + p33) / 16;
+				}
+				imageData2.data[4 * (i * canvas.width + j) + 3] = 255;
+			}
+		}
+		var imageData3 = ctx2.createImageData(canvas.width, canvas.height);
+		for(let i = 0;i < canvas.height;i++) {
+			for(let j = 0;j < canvas.width;j++) {
+				for (let k = 0;k < 3;k++) {
+					p11 = imageData2.data[4 * ((i - 1) * canvas.width + j - 1) + k];
+					p12 = imageData2.data[4 * ((i - 1) * canvas.width + j) + k];
+					p13 = imageData2.data[4 * ((i - 1) * canvas.width + j + 1) + k];
+					p21 = imageData2.data[4 * ((i) * canvas.width + j - 1) + k];
+					p22 = imageData2.data[4 * ((i) * canvas.width + j) + k];
+					p23 = imageData2.data[4 * ((i) * canvas.width + j + 1) + k];
+					p31 = imageData2.data[4 * ((i + 1) * canvas.width + j - 1) + k];
+					p32 = imageData2.data[4 * ((i + 1) * canvas.width + j) + k];
+					p33 = imageData2.data[4 * ((i + 1) * canvas.width + j + 1) + k];
+					var Sy = (-1 * p11 - 2 * p12 - 1 * p13 + p31 + 2 * p32 + p33);
+					var Sx = (-1 * p11 - 2 * p21 - 1 * p31 + p13 + 2 * p23 + p33);
+					imageData3.data[4 * (i * canvas.width + j) + k] = Math.sqrt(Sx * Sx + Sy * Sy);
+				}
+				imageData3.data[4 * (i * canvas.width + j) + 3] = 255;
+			}
+		}
+		ctx2.putImageData(imageData3, 0, 0);
+	};
+
+	var combmethbtn = document.getElementById('btn');
+	combmethbtn.addEventListener('click', combmeth);
+
+</script>
+
+</BODY>
+</HTML>

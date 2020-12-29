@@ -1,0 +1,129 @@
+<HTML>
+<BODY>
+
+<p><input type = "file"></p>
+<canvas id='hw8' style='border:2px solid'>
+</canvas>
+
+<script>
+    var canvas = document.getElementById("hw8");
+    var ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    var verts = [];
+    var surfs = [];
+    var shx = canvas.width / 2;
+    var shy = canvas.height / 2;
+	var input = document.querySelector('input[type="file"]');
+	
+    input.addEventListener('change', function(){
+        var read = new FileReader();
+        read.onload = function(){
+            var line = read.result.split('\n');
+            for(var i = 0; i < line.length; i++) 
+			{
+                var ps = line[i].split(/\s+/);
+                if(ps[0] === "v")
+				{
+                    verts.push([parseFloat(ps[1]), parseFloat(ps[2]), parseFloat(ps[3])]);
+                }
+                if(ps[0] === "f") 
+				{
+                    var list = [];
+                    for(var j = 1; j < ps.length; j++) 
+					{
+                        list.push(parseInt(ps[j]));
+                    }
+                    surfs.push(list);
+                }
+            }
+            model();
+            surfs = [];
+            verts = [];
+        }
+        read.readAsText(input.files[0]);
+    }, false);
+	
+    function line(ctx, x0, y0, x1, y1) 
+	{
+		var dy = Math.abs(y1 - y0);
+		var dx = Math.abs(x1 - x0);
+		var dmax = Math.max(dx, dy);
+		var dmin = Math.min(dx, dy);
+		var xdir = 1;
+		var ydir = 1;
+		var eps = 0;
+		var s = 1;
+		var k = 2 * dmin;
+		if(x1 < x0)
+		{
+			xdir = -1;
+		}
+		if(y1 < y0)
+		{
+			ydir = -1;
+		}
+		if(dy <= dx) 
+		{
+			var y = y0;
+			for(var x = x0; x * xdir <= x1 * xdir; x += xdir) 
+			{
+				ctx.fillRect(x * s, y * s, 2 * s, 2 * s);
+				eps += k;
+				if(eps > dmax) 
+				{
+					y += ydir;
+					eps -= 2 * dmax;
+				}
+			}
+		} 
+		else 
+		{
+			var x = x0;
+			for(var y = y0; y * ydir <= y1 * ydir; y += ydir) 
+			{
+				ctx.fillRect(x * s, y * s, 2 * s, 2 * s);
+				eps += k;
+				if(eps > dmax) 
+				{
+					x += xdir;
+					eps -= 2 * dmax;
+				}
+			}
+		}
+	}
+
+    function model() 
+	{
+        ctx.fillStyle = "000000";
+        surfs.forEach(surfs => {
+            var size = surfs.length;
+            for(var i = 0; i < size; i++) 
+			{
+                var start = verts[surfs[i] - 1];
+                var end = 0;
+                if (i === size - 1)
+				{
+					end = verts[surfs[0] - 1];
+				}
+                else
+				{
+					end = verts[surfs[i + 1] - 1];
+				}
+                if (start === undefined || end === undefined) 
+				{
+                    continue;
+                }
+                var x0 = start[0] + shx;
+                var y0 = shy - start[1];
+                var x1 = end[0] + shx;
+                var y1 = shy - end[1];
+                line(ctx, x0, y0, x1, y1);
+            }
+        })
+    }
+
+</script>
+</BODY>
+</HTML>

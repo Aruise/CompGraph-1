@@ -1,0 +1,150 @@
+<HTML>
+<BODY>
+
+<canvas id='hw7' height='800' width='800' style='border:2px solid'>
+</canvas>
+
+<script>
+	var canvas = document.getElementById('hw7');
+    var ctx = canvas.getContext('2d');
+    var ipt = 0;
+    var points = [];
+	
+    class point
+	{
+        constructor(x, y) 
+		{
+            this.x = x;
+            this.y = y;        
+        }
+    }
+
+    canvas.addEventListener('click', function(e){
+        points[ipt] = new point(e.offsetX, e.offsetY);
+        ctx.fillRect(e.offsetX, e.offsetY, 1, 1);
+        ipt++;
+    });
+
+    canvas.addEventListener("contextmenu", function(){
+        fillPoly(ctx, points);
+        ipt = 0;
+        points = [];
+    });
+	
+	function line(ctx, x0, y0, x1, y1) 
+	{
+		var dy = Math.abs(y1 - y0);
+		var dx = Math.abs(x1 - x0);
+		var dmax = Math.max(dx, dy);
+		var dmin = Math.min(dx, dy);
+		var xdir = 1;
+		var ydir = 1;
+		var eps = 0;
+		var s = 1;
+		var k = 2 * dmin;
+		if(x1 < x0)
+		{
+			xdir = -1;
+		}
+		if(y1 < y0)
+		{
+			ydir = -1;
+		}
+		if(dy <= dx) 
+		{
+			var y = y0;
+			for(var x = x0; x * xdir <= x1 * xdir; x += xdir) 
+			{
+				ctx.fillRect(x * s, y * s, 2 * s, 2 * s);
+				eps += k;
+				if(eps > dmax) 
+				{
+					y += ydir;
+					eps -= 2 * dmax;
+				}
+			}
+		} 
+		else 
+		{
+			var x = x0;
+			for(var y = y0; y * ydir <= y1 * ydir; y += ydir) 
+			{
+				ctx.fillRect(x * s, y * s, 2 * s, 2 * s);
+				eps += k;
+				if(eps > dmax) 
+				{
+					x += xdir;
+					eps -= 2 * dmax;
+				}
+			}
+		}
+	}
+	
+    function fillPoly(ctx, points) 
+	{
+        var y_max = points[0].y;
+		var y_min = y_max;
+        for(var i = 1; i < points.length; i++) 
+		{
+            if (points[i].y > y_max)
+			{
+				y_max = points[i].y;
+			}  
+            if (points[i].y < y_min)
+			{
+				y_min = points[i].y;
+			}   
+        }
+        var y_arr = [];
+        for(var i = 0; i < points.length; i++) 
+		{
+            var max = 0;
+			var min = 0;
+            var p = 0;
+            if(i !== (points.length - 1))
+			{
+				p = i + 1;
+			}
+            if(points[i].y > points[p].y) 
+			{
+                max = i;
+                min = p;
+            }
+			else if(points[i].y < points[p].y) 
+			{
+                max = p;
+                min = i;
+            }
+			else 
+			{
+				continue;
+			}
+            var k = (points[max].y - points[min].y) / (points[max].x - points[min].x);
+            for(var j = points[min].y; j < points[max].y; j++) 
+			{
+				if(typeof y_arr[j] == "undefined")
+				{
+					y_arr[j] = [];
+				}
+                y_arr[j].push((j - points[min].y) / k + points[min].x);
+            }
+        }
+        for(var y = y_min; y < y_max; y++) 
+		{
+            var x_arr = y_arr[y].sort(function (a, b) {
+                return a - b;
+            });
+            for(var j = 0; j < x_arr.length / 2; j++) 
+			{
+                for(var x = x_arr[j * 2]; x < x_arr[j * 2 + 1]; x++) 
+				{
+					ctx.fillRect(x, y, 1, 1);
+                }
+            }
+        }
+    }
+
+</script>
+
+</BODY>
+</HTML>
